@@ -65,6 +65,9 @@
 
 		// input strings of text
 		this.strings = this.options.strings;
+		
+        // Should the current string be backspaced first?
+        this.backspaceFirst = this.options.backspaceFirst;
 
 		// character number position of current string
 		this.strPos = 0;
@@ -112,7 +115,11 @@
 				if(self.shuffle) self.sequence = self.shuffleArray(self.sequence);
 
 				// Start typing
-				self.typewrite(self.strings[self.sequence[self.arrayPos]], self.strPos);
+                if(self.backspaceFirst)
+                    self.backspace(self.strings[self.sequence[self.arrayPos]], self.strings[self.sequence[self.arrayPos]].length);
+                else
+                    self.typewrite(self.strings[self.sequence[self.arrayPos]], self.strPos);
+
 			}, self.startDelay);
 		},
 
@@ -137,6 +144,10 @@
 
 		// pass current string state to each function, types 1 char per call
 		typewrite: function(curString, curStrPos) {
+		    // Stops blinking while typing
+			var tmpcursor = document.getElementsByClassName("typed-cursor")[0];
+ 			if (tmpcursor) tmpcursor.style.animationPlayState = "paused";
+ 
 			// exit when stopped
 			if (this.stop === true) {
 				return;
@@ -198,7 +209,10 @@
 
 				// timeout for any pause after a character
 				self.timeout = setTimeout(function() {
-					if (curStrPos === curString.length) {
+					if (curStrPos === curString.length) {	
+						// Resume blinking when typing stops
+ 						if (tmpcursor) tmpcursor.style.animationPlayState = "running";
+ 
 						// fires callback function
 						self.options.onStringTyped(self.arrayPos);
 
@@ -254,6 +268,10 @@
 		},
 
 		backspace: function(curString, curStrPos) {
+			// Stops blinking when backspacing
+ 			var tmpcursor = document.getElementsByClassName("typed-cursor")[0];
+ 			if (tmpcursor) tmpcursor.style.animationPlayState = "paused";
+		
 			// exit when stopped
 			if (this.stop === true) {
 				return;
